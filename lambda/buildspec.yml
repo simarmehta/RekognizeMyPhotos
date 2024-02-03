@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+
+  pre_build:
+    commands:
+      - echo Running tests...
+      # Add commands to run your tests here (if any)
+
+  build:
+    commands:
+      - ls
+      - echo Building Lambda function 1...
+      - cd lambda/lf1
+      - zip -r ../lambda_function_1.zip *
+      - aws s3 cp ../lambda_function_1.zip s3://b1-cdpipe
+      - cd ../lf2
+      - zip -r ../lambda_function_2.zip *
+      - aws s3 cp ../lambda_function_2.zip s3://b1-cdpipe
+
+  post_build:
+    commands:
+      - echo Updating Lambda functions...
+      - aws lambda update-function-code --function-name IndexPhotosFunction1 --s3-bucket b1-cdpipe --s3-key lambda_function_1.zip
+      - aws lambda update-function-code --function-name SearchPhotosFunction1 --s3-bucket b1-cdpipe --s3-key lambda_function_2.zip
+
